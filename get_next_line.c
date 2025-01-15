@@ -13,46 +13,64 @@
 #include "get_next_line.h"
 // #include "get_next_line_utils.c"
 
-char	*get_next_line(int fd)
+void	rest(char *line, char *buffer)
 {
-	static char	buffer[BUFFER_SIZE + 1];
-	char		*line;
-	int			to_copy;
+	int		to_copy;
+	char	*new_line;
 
-	line = ft_strdup(buffer);
-	while (!(ft_strchr(line, '\n')) && read(fd, buffer, BUFFER_SIZE))
+	new_line = ft_strchr(line, '\n');
+	to_copy = 0;
+	if (new_line)
 	{
-		buffer[BUFFER_SIZE] = '\0';
-		line = ft_strjoin(line, buffer);
-	}
-	if (str_len(line) == 0)
-		return (free(line), NULL);
-	if (ft_strchr(line, '\n'))
-	{
-		to_copy = (ft_strchr(line, '\n')) - line + 1;
-		ft_strcpy(buffer, (ft_strchr(line, '\n')) + 1);
+		to_copy = new_line - line + 1;
+		ft_strcpy(buffer, new_line + 1);
 	}
 	else
 	{
 		to_copy = str_len(line);
 		buffer[0] = '\0';
 	}
-	line[to_copy] = '\0';
+	line[to_copy] = '\0';	
+}
+
+char	*get_new_line(int fd, char *line, char *buffer)
+{
+	char	*new_line;
+	int		count;
+
+	new_line = ft_strchr(line, '\n');
+	count = read(fd, buffer, BUFFER_SIZE);
+	while (!new_line && count > 0)
+	{
+		buffer[count] = '\0';
+		line = ft_strjoin(line, buffer);
+		count = read(fd, buffer, BUFFER_SIZE);
+	}
+	return (line);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	buffer[BUFFER_SIZE + 1];
+	char		*line;
+
+	line = ft_strdup(buffer);
+	line = get_new_line(fd, line, buffer);
+	if (str_len(line) == 0)
+		return (free(line), NULL);
+	rest(line, buffer);
 	return (line);
 }
 
 int	main(void)
 {
-	int	i;
 	int	file;
+	char	*ret;
 
-	i = 3;
+	ret = ft_strdup("");
 	file = open("name.txt", O_RDONLY);
-	while (i)
-	{
-		printf("%s", get_next_line(file));
-		i--;
-	}
+	while ((ret = get_next_line(file)))
+		printf("%s", ret);
 	close(file);
 	return (0);
 }

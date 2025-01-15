@@ -78,5 +78,6 @@ char	*ft_strjoin(char *dest, char *src)
 		return (NULL);
 	ft_strcpy(buffer, dest);
 	ft_strcpy(&buffer[d_len], src);
+	free(dest);
 	return (buffer);
 }
