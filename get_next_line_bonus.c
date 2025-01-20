@@ -13,6 +13,7 @@
 #include "get_next_line.h"
 // #include "get_next_line_utils.c"
 
+
 void	rest(char *line, char *buffer)
 {
 	int		to_copy;
@@ -56,57 +57,44 @@ char	*get_new_line(int fd, char *line, char *buffer)
 
 char	*get_next_line(int fd)
 {
-	static char	buffer[BUFFER_SIZE + 1];
+	static char	buffer[FOPEN_MAX][BUFFER_SIZE + 1];
 	char		*line;
 
-	line = ft_strdup(buffer);
-	line = get_new_line(fd, line, buffer);
+	if (fd < 0 || BUFFER_SIZE <= 0 || fd >= 16)
+		return (NULL);
+	line = ft_strdup(buffer[fd]);
+	line = get_new_line(fd, line, buffer[fd]);
 	if (str_len(line) == 0)
 		return (free(line), NULL);
-	rest(line, buffer);
+	rest(line, buffer[fd]);
 	return (line);
-}
-
-int	ft_strcmp(const char *str1, const char *str2)
-{
-	size_t	i;
-
-	i = 0;
-	while ((str1[i] || str2[i]))
-	{
-		if (str1[i] != str2[i])
-			return ((unsigned char)str1[i] - (unsigned char)str2[i]);
-		i++;
-	}
-	return (0);
 }
 
 // int	main(void)
 // {
-// 	int	file;
-// 	char	*ret;
+// 	int	file1;
+// 	int	file2;
+// 	char	*ret1;
+// 	char	*ret2;
 // 	char	buffer[BUFFER_SIZE];
-// 	int	lineno = 0;
-
-// 	file = open("name.txt", O_RDONLY);
-// 	while ((ret = get_next_line(file)))
+// 	file1 = open("name.txt", O_RDONLY);
+// 	file2 = open("name2.txt", O_RDONLY);
+// 	while (ret1 && ret2)
 // 	{
-// 		printf("%d: \"%s\" (len = %d)\n", lineno, ret, str_len(ret));
-// 		printf("%d\n", ft_strcmp(ret, "2"));
-// 		free(ret);
-// 		lineno++;
+// 		ret1 = get_next_line(file1);
+// 		printf("%s\n", ret1);
+// 		ret2 = get_next_line(file2);
+// 		printf("%s\n", ret2);
 // 	}
-// 	close(file);
+// 	close(file1);
 // 	return (0);
 // }
-
 // char	*get_next_line(int fd)
 // {
 // 	static char	buffer[BUFFER_SIZE];
 // 	char		*line;
 // 	char		*new_line;
 // 	int			count;
-
 // 	line = ft_strdup(buffer);
 // 	while (1)
 // 	{
